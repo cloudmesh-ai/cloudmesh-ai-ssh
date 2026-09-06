@@ -109,8 +109,7 @@ cmc ssh check ai --url http://ai-server:17704 --api-key YOUR_API_KEY
 ```
 
 !!! note "Fallback Behavior"
-
-If the tool cannot connect to the vLLM server, it will automatically save the gathered diagnostic data to `ssh_diag.json` in your current directory so you can analyze the errors manually.
+    If the tool cannot connect to the vLLM server, it will automatically save the gathered diagnostic data to `ssh_diag.json` in your current directory so you can analyze the errors manually.
 
 ## RSA Encryption
 
