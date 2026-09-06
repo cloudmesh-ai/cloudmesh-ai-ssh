@@ -1,5 +1,7 @@
 # cloudmesh-ai-ssh
 
+**Code:** [GitHub](https://github.com/cloudmesh-ai/cloudmesh-ai-ssh) | **Documentation:** [Docs](https://cloudmesh-ai.github.io/cloudmesh-ai-ssh/)
+
 !!! info "Learning Objectives"
 
     * Install and configure the `cloudmesh-ai-ssh` package.
@@ -11,6 +13,12 @@
 The `cloudmesh-ai-ssh` library provides a Python API and CLI tools for managing SSH tunnels, configuration files, authorized keys, and RSA encryption. It is designed for use in automation pipelines and by AI agents.
 
 ## Installation
+
+Install the package from PyPI:
+
+```bash
+pip install cloudmesh-ai-ssh
+```
 
 Install the package in editable mode for local development:
 
