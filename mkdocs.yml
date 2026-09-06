@@ -6,6 +6,7 @@ nav:
 - Documents:
   - Usage: usage.md
 - API Reference: api.md
+- Source Code: https://github.com/cloudmesh-ai/cloudmesh-ai-ssh
 plugins:
 - cloudmesh-ai-theme
 - search
@@ -25,6 +26,9 @@ plugins:
         paths:
         - src
 site_name: Cloudmesh AI SSH
+
+repo_url: https://github.com/cloudmesh-ai/cloudmesh-ai-ssh
+repo_name: cloudmesh-ai-ssh
 
 markdown_extensions:
   - admonition

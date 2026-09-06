@@ -9,6 +9,7 @@
 import json
 import os
 import yaml
+import subprocess
 from pathlib import Path
 from textwrap import dedent
 from typing import Dict, List, Optional, Union
@@ -31,6 +32,8 @@ class SSHConfig(SSHBase):
             self.filename = self.resolve_path("~/.ssh/config")
         
         self.conf: Optional[SshConf] = None
+        self._resolved_cache: Dict[str, Dict[str, str]] = {}
+        self.load()
     def get_content(self) -> str:
         """Return the raw content of the SSH config file."""
         try:
@@ -58,18 +61,74 @@ class SSHConfig(SSHBase):
             raise SSHConfigError(f"Could not load ssh config file {self.filename}: {e}")
             self.conf = None
 
-    def _ensure_loaded(self):
-        """Ensure the config is loaded into self.conf."""
-        if self.conf is None:
-            try:
-                self.load()
-            except SSHConfigError as e:
-                logger.error(f"SSH config load failed: {e}")
-                # If it can't be loaded, we keep self.conf as None
-                pass
+    def _get_resolved_config(self, host: str) -> Dict[str, str]:
+        """Use 'ssh -G' to get the fully resolved configuration for a host, with caching."""
+        if host in self._resolved_cache:
+            return self._resolved_cache[host]
+
+        try:
+            # -G: print resolved configuration for this host
+            # -F: use specific config file
+            result = subprocess.run(
+                ["ssh", "-F", str(self.filename), "-G", host],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            if result.returncode == 0:
+                config = {}
+                for line in result.stdout.splitlines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    # ssh -G output is typically 'option value'
+                    parts = line.split(None, 1)
+                    if len(parts) == 2:
+                        k, v = parts
+                        config[k.strip()] = v.strip()
+                self._resolved_cache[host] = config
+                return config
+        except Exception as e:
+            logger.error(f"Error resolving config for host {host} via ssh -G: {e}")
+        
+        return {}
+
+
+    def _get_explicit_keys(self, host: str) -> List[str]:
+        """Identify all keys explicitly defined in the config file for a host.
+        
+        This includes keys defined in the specific host block and the 'Host *' block.
+        """
+        explicit_keys = set()
+        try:
+            with open(self.filename, "r") as f:
+                lines = f.readlines()
+        except Exception as e:
+            logger.error(f"Could not read config file for key extraction: {e}")
+            return []
+
+        current_hosts = []
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            
+            if line.lower().startswith("host "):
+                # Start of a new block
+                current_hosts = line[5:].strip().split()
+            elif current_hosts:
+                # Inside a host block
+                # Check if this block applies to the target host or is a wildcard
+                if any(h.lower() == host.lower() or h == "*" for h in current_hosts):
+                    # Extract the key from 'Key Value'
+                    parts = line.split(None, 1)
+                    if len(parts) == 2:
+                        explicit_keys.add(parts[0])
+        
+        return list(explicit_keys)
 
     def get_options(self, host: str) -> str:
-        """Get all configuration options for a host, excluding HostName and User.
+        """Get configuration options for a host that are explicitly defined in the config file.
 
         Args:
             host: the host name.
@@ -77,19 +136,36 @@ class SSHConfig(SSHBase):
         Returns:
             str: comma-separated string of options.
         """
-        self._ensure_loaded()
-        if not self.conf:
+        explicit_keys = self._get_explicit_keys(host)
+        if not explicit_keys:
             return ""
-        try:
-            all_opts = self.conf.get_all(host)
-            # Filter out HostName and User as they have their own columns
-            filtered = {k: v for k, v in all_opts.items() if k.lower() not in ["hostname", "user"]}
-            if not filtered:
-                return ""
-            return ", ".join([f"{k}={v}" for k, v in filtered.items()])
-        except Exception as e:
-            logger.error(f"Error getting options for host {host}: {e}")
+
+        # Get fully resolved configuration from ssh -G
+        resolved_config = self._get_resolved_config(host)
+
+        # Only keep options that were explicit in the config, and filter out HostName/User
+        filtered = {}
+        for k in explicit_keys:
+            k_lower = k.lower()
+            if k_lower not in ["hostname", "user"]:
+                # Prefer the resolved value from ssh -G
+                # ssh -G output keys are lowercase
+                if k_lower in resolved_config:
+                    filtered[k] = resolved_config[k_lower]
+                else:
+                    # Fallback to raw value from config if ssh -G didn't return it
+                    # (this is rare for valid options)
+                    try:
+                        # We can't easily get the raw value without a real parser, 
+                        # so we'll just use the key name or skip it.
+                        # But for now, let's just use the resolved config.
+                        pass
+                    except Exception:
+                        pass
+
+        if not filtered:
             return ""
+        return ", ".join([f"{k}={v}" for k, v in filtered.items()])
 
     def list(self) -> List[str]:
         """List the hosts defined in the config file.
@@ -210,50 +286,17 @@ class SSHConfig(SSHBase):
         return self.execute("localhost", command)
 
     def username(self, host: str) -> Optional[str]:
-        """Returns the username for a given host, falling back to global config or local user.
-
-        Args:
-            host: the hostname.
-
-        Returns:
-            Optional[str]: the username associated with the host, the global user, 
-            or the local system user.
-        """
-        self._ensure_loaded()
-        if not self.conf:
-            return os.environ.get("USER", "user")
-
-        # sshconf handles the hierarchy (specific -> global) automatically
-        try:
-            opts = self.conf.get_all(host)
-            user = opts.get("user", opts.get("User", ""))
-            if user:
-                return user
-        except Exception as e:
-            logger.error(f"Error getting username for host {host}: {e}")
-        
+        """Returns the username for a given host, falling back to local user."""
+        opts = self._get_resolved_config(host)
+        user = opts.get("user", opts.get("User", ""))
+        if user:
+            return user
         return os.environ.get("USER", "user")
-
     def hostname(self, host: str) -> str:
-        """Returns the actual HostName for the given host.
-
-        Args:
-            host: the host identifier to look up.
-
-        Returns:
-            The actual hostname or IP address associated with the host identifier.
-        """
-        self._ensure_loaded()
-        if not self.conf:
-            return host
-
-        try:
-            opts = self.conf.get_all(host)
-            hostname = opts.get("hostname", opts.get("HostName", ""))
-            return hostname if hostname else host
-        except Exception as e:
-            logger.error(f"Error getting hostname for host {host}: {e}")
-            return host
+        """Returns the actual HostName for the given host."""
+        opts = self._get_resolved_config(host)
+        hostname = opts.get("hostname", opts.get("HostName", ""))
+        return hostname if hostname else host
 
     def yaml(self) -> str:
         """Returns the parsed SSH configuration in YAML format.

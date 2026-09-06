@@ -2,6 +2,7 @@ import click
 import time
 import sys
 import requests
+import yaml
 from pathlib import Path
 from cloudmesh.ai.common.io import console, path_expand, Table
 from cloudmesh.ai.common.logging_utils import get_contextual_logger
@@ -13,6 +14,31 @@ from cloudmesh.ai.ssh.ssh_config import SSHConfig
 # Initialize Logger and Telemetry
 logger = get_contextual_logger("ssh")
 telemetry = Telemetry("ssh")
+def load_llm_config():
+    """Load LLM configuration from ~/.config/cloudmesh/ai/llm.yaml, creating it if missing."""
+    config_path = Path("~/.config/cloudmesh/ai/llm.yaml").expanduser()
+    
+    if not config_path.exists():
+        console.info(f"Creating default LLM config at {config_path}...")
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        default_config = {
+            "url": "http://localhost:17704/v1",
+            "model": "google/gemma-4-31B-it",
+            "key": ""
+        }
+        with open(config_path, "w") as f:
+            yaml.dump(default_config, f, default_flow_style=False)
+        console.info("Default config created. Please edit the file to add your API key.")
+        return default_config
+    
+    try:
+        with open(config_path, "r") as f:
+            return yaml.safe_load(f) or {}
+    except Exception as e:
+        logger.error(f"Error loading LLM config: {e}")
+        return {}
+
+
 
 def _render_table(rows):
     """Helper to render a list of dictionaries as a rich table."""
@@ -231,17 +257,22 @@ def check_ai(api_key):
         "errors": errors
     }
     
-    # 4. Submit to the vLLM server (OpenAI compatible API)
-    base_url = "http://localhost:17704"
+    # Load LLM config from YAML
+    config = load_llm_config()
     
-    # Load default API key if none provided
+    # Determine base URL using url from config, default to http://localhost:17704/v1
+    base_url = config.get("url", "http://localhost:17704/v1")
+    
+    # Determine API key priority: CLI -> YAML config -> legacy file
     if not api_key:
-        try:
-            key_path = Path("~/gemma/server_master_key.txt").expanduser()
-            if key_path.exists():
-                api_key = key_path.read_text().strip()
-        except Exception as e:
-            logger.debug(f"Could not load default API key from ~/gemma/server_master_key.txt: {e}")
+        api_key = config.get("key")
+        if not api_key:
+            try:
+                key_path = Path("~/gemma/server_master_key.txt").expanduser()
+                if key_path.exists():
+                    api_key = key_path.read_text().strip()
+            except Exception as e:
+                logger.debug(f"Could not load default API key from ~/gemma/server_master_key.txt: {e}")
     
     headers = {}
     if api_key:
@@ -249,12 +280,17 @@ def check_ai(api_key):
     
     try:
         # a. Get the model name from the vLLM server
-        model_response = requests.get(f"{base_url}/v1/models", headers=headers, timeout=10)
+        model_response = requests.get(f"{base_url}/models", headers=headers, timeout=10)
         model_response.raise_for_status()
         models = model_response.json().get("data", [])
-        if not models:
-            raise Exception("No models found on the vLLM server.")
-        model_name = models[0]["id"]
+        
+        # Use model from config if specified, otherwise use the first available model from server
+        model_name = config.get("model")
+        if not model_name and models:
+            model_name = models[0]["id"]
+        
+        if not model_name:
+            raise Exception("No model specified in config and no models found on the vLLM server.")
         
         # b. Construct the prompt for the LLM
         system_prompt = (
@@ -273,9 +309,9 @@ def check_ai(api_key):
             "temperature": 0.2
         }
         
-        console.info(f"Sending diagnostics to vLLM model {model_name} at {base_url}/v1/chat/completions...")
+        console.info(f"Sending diagnostics to vLLM model {model_name} at {base_url}/chat/completions...")
         
-        response = requests.post(f"{base_url}/v1/chat/completions", json=payload, headers=headers, timeout=60)
+        response = requests.post(f"{base_url}/chat/completions", json=payload, headers=headers, timeout=60)
         response.raise_for_status()
         
         result = response.json()
