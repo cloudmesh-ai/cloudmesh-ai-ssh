@@ -1,118 +1,160 @@
 # cloudmesh-ai-ssh
 
-`cloudmesh-ai-ssh` is a professional SSH management extension for the Cloudmesh AI ecosystem. It provides a high-level Python API and CLI tools for managing SSH tunnels, configuration files, authorized keys, and RSA encryption, designed specifically for AI agents and cloud automation.
+!!! info "Learning Objectives"
 
-## 🚀 Key Features
+    * Install and configure the `cloudmesh-ai-ssh` package.
+    * Create and manage SSH tunnels for remote service access.
+    * Programmatically manipulate the SSH configuration file.
+    * Use AI to diagnose and repair malformed SSH configuration entries.
+    * Encrypt and decrypt files using RSA keys.
 
-- **AI-Powered Config Repair**: Automatically diagnose malformed `~/.ssh/config` entries and submit them to a vLLM server for expert AI-driven repair suggestions.
+The `cloudmesh-ai-ssh` library provides a Python API and CLI tools for managing SSH tunnels, configuration files, authorized keys, and RSA encryption. It is designed for use in automation pipelines and by AI agents.
 
-- **Advanced Tunneling**: Create and manage SSH port-forwarding tunnels with automatic lifecycle management and aggressive "force-stop" cleanup.
-- **SSH Config Management**: Programmatically read, modify, and generate `~/.ssh/config` entries with a rich CLI list view.
-- **Secure File Transfer**: High-level wrappers for SFTP uploads and downloads via Fabric.
-- **Key Management**: Manage `authorized_keys` files and generate public key fingerprints.
-- **RSA Encryption**: Encrypt and decrypt files using RSA keys via OpenSSL.
-- **Robust Error Handling**: A dedicated exception hierarchy for precise error catching in automation pipelines.
+## Installation
 
-## 📦 Installation
+Install the package in editable mode for local development:
 
 ```bash
-pip install .
+pip install -e .
 ```
 
-## 🛠 Quick Start
+## SSH Tunneling
 
-### CLI Usage
+SSH tunnels allow secure access to remote services by forwarding a local port to a remote host via a jump server.
 
-The `cmc ssh` command group provides a convenient way to manage tunnels from the terminal.
+### Creating a tunnel via CLI
 
-**Create a tunnel:**
+Use the `cmc ssh tunnel` command. The basic format is `SSH_HOST:REMOTE_PORT`.
+
 ```bash
-# Format: cmc ssh tunnel "SSH_HOST:REMOTE_PORT"
 cmc ssh tunnel "my-server:8000"
 ```
-*This creates a tunnel from `localhost:8000` $\rightarrow$ `localhost:8000` via `my-server`.*
 
-**Advanced tunnel options:**
+This forwards `localhost:8000` to `localhost:8000` on `my-server`.
+
+### Advanced tunnel configuration
+
+You can specify custom local ports and remote hosts:
+
 ```bash
 cmc ssh tunnel "my-server:8000" --local-port 9000 --remote-host "db-internal.local" --ssh-user "admin"
 ```
 
+### Using the Python API
 
-**List SSH Hosts (with details):**
-```bash
-cmc ssh list
-```
-*Displays a rich table of all hosts, their hostnames, users, and detailed configuration options.*
+The `Tunnel` class supports the context manager pattern to ensure tunnels are closed automatically.
 
-**Diagnose and Repair Config with AI:**
-```bash
-# Uses default vLLM server (localhost:17704) and master key from ~/gemma/server_master_key.txt
-cmc ssh check ai
-
-# Specify a custom vLLM server and API key
-cmc ssh check ai --url http://ai-server:17704 --api-key YOUR_API_KEY
-```
-*Detects syntax errors in your SSH config and provides an AI-generated corrected version.*
-
-**List SSH Hosts (with details):**
-```bash
-cmc ssh list
-```
-*Displays a rich table of all hosts, their hostnames, users, and detailed configuration options.*
-
-**Diagnose and Repair Config with AI:**
-```bash
-# Uses default vLLM server (localhost:17704) and master key from ~/gemma/server_master_key.txt
-cmc ssh check ai
-
-# Specify a custom vLLM server and API key
-cmc ssh check ai --url http://ai-server:17704 --api-key YOUR_API_KEY
-```
-*Detects syntax errors in your SSH config and provides an AI-generated corrected version.*
-
-
-### Python API Usage
-
-#### 1. SSH Tunneling
 ```python
 from cloudmesh.ai.ssh.tunnel import Tunnel
 
-# Using the context manager for automatic cleanup
 with Tunnel(local_port=8080, remote_host="localhost", remote_port=80, ssh_host="jump-box") as tunnel:
-    print("Tunnel is active! Access the remote service at http://localhost:8080")
-    # Your application logic here
+    print("Tunnel is active. Access the remote service at http://localhost:8080")
 ```
 
-#### 2. SSH Configuration
+## SSH Configuration Management
+
+The library allows reading and modifying the `~/.ssh/config` file without manual text editing.
+
+### Listing hosts
+
+Use the `list` command to see a detailed table of all defined hosts, including their hostnames, users, and options.
+
+```bash
+cmc ssh list
+```
+
+### Generating config entries
+
+Use the `SSHConfig` class to add new hosts to the configuration.
+
 ```python
 from cloudmesh.ai.ssh.ssh_config import SSHConfig
 
 cfg = SSHConfig()
-# Generic generation: no more hardcoded defaults!
 cfg.generate(host="my-server", hostname="1.2.3.4", user="ubuntu")
-print(f"Hosts defined in config: {cfg.names()}")
 ```
 
-#### 3. RSA Encryption
+## AI-Powered Configuration Repair
+
+The `cloudmesh-ai-ssh` tool can detect syntax errors in your SSH configuration and use a vLLM AI server to suggest precise repairs.
+
+### How it Works
+
+1.  **Diagnostics**: The tool scans `~/.ssh/config` for malformed entries and extracts the raw configuration content.
+2.  **AI Analysis**: It sends this diagnostic data to a vLLM server (which uses an OpenAI-compatible API).
+3.  **Repair Suggestion**: The AI analyzes the errors and provides a corrected version of the configuration block with an explanation of the fix.
+
+### Running diagnostics
+
+Use the `check ai` command to begin the process. By default, the tool looks for an API key in `~/gemma/server_master_key.txt` and connects to a local vLLM server.
+
+```bash
+cmc ssh check ai
+```
+
+### Custom AI server configuration
+
+If your vLLM server is hosted on a different URL or requires a specific API key, use the following options:
+
+```bash
+cmc ssh check ai --url http://ai-server:17704 --api-key YOUR_API_KEY
+```
+
+!!! note "Fallback Behavior"
+
+If the tool cannot connect to the vLLM server, it will automatically save the gathered diagnostic data to `ssh_diag.json` in your current directory so you can analyze the errors manually.
+
+## RSA Encryption
+
+The `SSHEncryption` class provides wrappers for RSA encryption and decryption using OpenSSL.
+
+### Encrypting a file
+
 ```python
 from cloudmesh.ai.ssh.encryption import SSHEncryption
 
 enc = SSHEncryption(file_in="secrets.txt", file_out="secrets.enc")
-enc.pem_create() # Create public PEM from private key
-enc.encrypt()    # Encrypt the file
-enc.decrypt()    # Decrypt the file
+enc.pem_create()
+enc.encrypt()
 ```
 
-## 📚 Documentation
+### Decrypting a file
 
-For detailed technical information, please visit the [API Reference](docs/api.md) and [Usage Guides](docs/usage.md).
+```python
+from cloudmesh.ai.ssh.encryption import SSHEncryption
 
-## ⚙️ Core Dependencies
+enc = SSHEncryption(file_in="temp.txt", file_out="secrets.enc")
+enc.decrypt()
+```
 
-This project is part of the Cloudmesh AI ecosystem and depends on:
-- [cloudmesh-ai-common](https://github.com/cloudmesh-ai/cloudmesh-ai-common)
-- [cloudmesh-ai-cmc](https://github.com/cloudmesh-ai/cloudmesh-ai-cmc)
-- `fabric` (for SSH connections)
-- `sshconf` (for config parsing)
-- `openssl` (CLI tool for encryption)
+## Summary Checklist
 
+* Installed `cloudmesh-ai-ssh`.
+* Created a local-to-remote SSH tunnel.
+* Listed and generated SSH configuration entries.
+* Repaired a malformed config using the AI diagnostic tool.
+* Encrypted and decrypted a file using RSA.
+
+## Practical Assignments
+
+!!! note "Assignment 1: Basic Tunneling"
+
+    Create a tunnel that forwards local port 8081 to a remote service running on port 80 at `internal-web.local` via a jump host named `bastion`.
+
+!!! note "Assignment 2: Config Automation"
+
+    Write a Python script that checks if a host named `dev-server` exists in the SSH config. If it does not, generate a new entry with hostname `192.168.1.10` and user `devuser`.
+
+!!! note "Assignment 3: AI Repair"
+
+    Intentionally introduce a syntax error into your `~/.ssh/config` (e.g., an invalid keyword). Use `cmc ssh check ai` to detect the error and apply the AI-suggested fix.
+
+## Core Dependencies
+
+This project depends on the following components:
+
+* [cloudmesh-ai-common](https://github.com/cloudmesh-ai/cloudmesh-ai-common)
+* [cloudmesh-ai-cmc](https://github.com/cloudmesh-ai/cloudmesh-ai-cmc)
+* `fabric` for SSH connections.
+* `sshconf` for config parsing.
+* `openssl` CLI tool for encryption.
