@@ -1,3 +1,7 @@
+fix_ssh_config.py
+log.md
+ssh_diag.json
+
 .report.html
 .cloudmesh
 .release_state.json
