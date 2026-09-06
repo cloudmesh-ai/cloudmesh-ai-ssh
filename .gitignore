@@ -1,3 +1,8 @@
+.report.html
+.cloudmesh
+.release_state.json
+.python-version
+.aider*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -25,6 +30,24 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Environment variables / Secrets
+.env
+.venv
+env/
+venv/
+ENV/
 
 # PyInstaller
 #   Usually these files are written by a python script from a template
@@ -184,7 +207,7 @@ cython_debug/
 # PyCharm
 #   JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #   be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#   and can be added to the global gitignore or merged into this file.  For a more nuclear
+#   and can be added to the global gitignore or merged into this file. For a more nuclear
 #   option (not recommended) you can uncomment the following to ignore the entire idea folder.
 # .idea/
 
@@ -200,8 +223,6 @@ cython_debug/
 #   and can be added to the global gitignore or merged into this file. However, if you prefer, 
 #   you could uncomment the following to ignore the entire vscode folder
 # .vscode/
-# Temporary file for partial code execution
-tempCodeRunnerFile.py
 
 # Ruff stuff:
 .ruff_cache/
@@ -216,3 +237,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Cloudmesh AI Release specific
+.release_state.json
+release_*.log
+.DS_Store

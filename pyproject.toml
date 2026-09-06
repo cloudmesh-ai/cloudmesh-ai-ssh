@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cloudmesh-ai-ssh"
+version = "0.1.0"
+description = "ssh command for Cloudmesh AI"
+readme = "README.md"
+license = "Apache-2.0"
+urls = { "Homepage" = "https://github.com/cloudmesh-ai/cloudmesh-ai-ssh" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "cloudmesh-ai-common",
+]
+
+[project.entry-points."cloudmesh.ai.cmc"]
+ssh = "cloudmesh.ai.command.ssh.ssh_group"
