@@ -12,7 +12,7 @@ VERSION_FILE := VERSION
 GIT          := git
 PYENVVERSION := $(shell pyenv version-name)
 
-.PHONY: help install clean build test reinstall doc view serve check tag release test-html test-cov setup-test uninstall-all tmp-setup
+.PHONY: help install clean build test reinstall doc view serve check tag release test-html test-cov setup-test uninstall-all tmp-setup publish
 
 help:
 	@echo
@@ -31,6 +31,7 @@ help:
 	@echo "  doc           - Build documentation using mkdocs"
 	@echo "  view          - Preview documentation locally"
 	@echo "  serve         - Start documentation server"
+	@echo "  publish       - Deploy documentation to GitHub Pages"
 	@echo
 
 # --- DEVELOPMENT & TESTING ---
@@ -109,4 +110,4 @@ reinstall: uninstall-all clean
 
 publish:
 	@echo "Deploying MkDocs site to GitHub Pages..."
-	./publish.sh
+	mkdocs gh-deploy
