@@ -1120,13 +1120,13 @@
 <p>The primary command for tunneling is <code>cmc ssh tunnel</code>.</p>
 <h4 id="basic-tunnel">Basic Tunnel</h4>
 <p>Forward a local port to the same port on a remote host.</p>
-<pre><code class="language-bash">cmc ssh tunnel &quot;my-server:8000&quot;
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>cmc<span class="w"> </span>ssh<span class="w"> </span>tunnel<span class="w"> </span><span class="s2">&quot;my-server:8000&quot;</span>
+</span></code></pre></div>
 <p>This forwards <code>localhost:8000</code> to <code>localhost:8000</code> on <code>my-server</code>.</p>
 <h4 id="advanced-tunnel">Advanced Tunnel</h4>
 <p>Specify a different local port, remote host, and SSH user.</p>
-<pre><code class="language-bash">cmc ssh tunnel &quot;my-server:8000&quot; --local-port 9000 --remote-host &quot;db-internal.local&quot; --ssh-user &quot;admin&quot;
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>cmc<span class="w"> </span>ssh<span class="w"> </span>tunnel<span class="w"> </span><span class="s2">&quot;my-server:8000&quot;</span><span class="w"> </span>--local-port<span class="w"> </span><span class="m">9000</span><span class="w"> </span>--remote-host<span class="w"> </span><span class="s2">&quot;db-internal.local&quot;</span><span class="w"> </span>--ssh-user<span class="w"> </span><span class="s2">&quot;admin&quot;</span>
+</span></code></pre></div>
 <h4 id="command-options">Command Options</h4>
 <table>
 <thead>
@@ -1156,33 +1156,33 @@
 </table>
 <h3 id="python-api-reference">Python API Reference</h3>
 <p>Use the <code>Tunnel</code> class to manage tunnels programmatically.</p>
-<pre><code class="language-python">from cloudmesh.ai.ssh.tunnel import Tunnel
-
-# Using the context manager ensures the tunnel is closed on exit
-with Tunnel(local_port=8080, remote_host=&quot;localhost&quot;, remote_port=80, ssh_host=&quot;jump-box&quot;) as tunnel:
-    # Tunnel is now active
-    pass
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">cloudmesh.ai.ssh.tunnel</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tunnel</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># Using the context manager ensures the tunnel is closed on exit</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">with</span> <span class="n">Tunnel</span><span class="p">(</span><span class="n">local_port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span> <span class="n">remote_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="n">remote_port</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">ssh_host</span><span class="o">=</span><span class="s2">&quot;jump-box&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tunnel</span><span class="p">:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="c1"># Tunnel is now active</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">pass</span>
+</span></code></pre></div>
 <h2 id="ssh-configuration-management">SSH Configuration Management</h2>
 <p>The library provides tools to inspect and modify the <code>~/.ssh/config</code> file.</p>
 <h3 id="cli-reference_1">CLI Reference</h3>
 <h4 id="list-hosts">List Hosts</h4>
 <p>Display all hosts defined in the SSH configuration with their associated hostnames, users, and options.</p>
-<pre><code class="language-bash">cmc ssh list
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>cmc<span class="w"> </span>ssh<span class="w"> </span>list
+</span></code></pre></div>
 <h3 id="python-api-reference_1">Python API Reference</h3>
 <p>Use the <code>SSHConfig</code> class to manipulate the configuration file.</p>
 <h4 id="generating-a-host-entry">Generating a Host Entry</h4>
 <p>Add a new host entry to the configuration.</p>
-<pre><code class="language-python">from cloudmesh.ai.ssh.ssh_config import SSHConfig
-
-cfg = SSHConfig()
-cfg.generate(host=&quot;work-server&quot;, hostname=&quot;10.0.0.5&quot;, user=&quot;dev-user&quot;)
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">cloudmesh.ai.ssh.ssh_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHConfig</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">cfg</span> <span class="o">=</span> <span class="n">SSHConfig</span><span class="p">()</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">cfg</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&quot;work-server&quot;</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="s2">&quot;10.0.0.5&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s2">&quot;dev-user&quot;</span><span class="p">)</span>
+</span></code></pre></div>
 <h4 id="listing-host-names">Listing Host Names</h4>
 <p>Retrieve a list of all host identifiers defined in the config.</p>
-<pre><code class="language-python">names = cfg.names()
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">names</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">names</span><span class="p">()</span>
+</span></code></pre></div>
 <h2 id="ai-powered-configuration-repair">AI-Powered Configuration Repair</h2>
 <p>The <code>cloudmesh-ai-ssh</code> library can diagnose syntax errors in the SSH configuration and suggest precise fixes via a vLLM AI server.</p>
 <h3 id="how-it-works">How it Works</h3>
@@ -1195,12 +1195,12 @@ cfg.generate(host=&quot;work-server&quot;, hostname=&quot;10.0.0.5&quot;, user=&
 <h3 id="cli-reference_2">CLI Reference</h3>
 <h4 id="run-ai-diagnostics">Run AI Diagnostics</h4>
 <p>Scan the SSH config for errors and submit them for AI repair.</p>
-<pre><code class="language-bash">cmc ssh check ai
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>cmc<span class="w"> </span>ssh<span class="w"> </span>check<span class="w"> </span>ai
+</span></code></pre></div>
 <h4 id="custom-server-configuration">Custom Server Configuration</h4>
 <p>Specify a custom vLLM server URL and API key.</p>
-<pre><code class="language-bash">cmc ssh check ai --url http://ai-server:17704 --api-key YOUR_API_KEY
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>cmc<span class="w"> </span>ssh<span class="w"> </span>check<span class="w"> </span>ai<span class="w"> </span>--url<span class="w"> </span>http://ai-server:17704<span class="w"> </span>--api-key<span class="w"> </span>YOUR_API_KEY
+</span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">API Key Requirement</p>
 </div>
@@ -1214,19 +1214,19 @@ cfg.generate(host=&quot;work-server&quot;, hostname=&quot;10.0.0.5&quot;, user=&
 <h3 id="python-api-reference_2">Python API Reference</h3>
 <h4 id="encrypting-a-file">Encrypting a File</h4>
 <p>This process involves creating a public PEM from a private key and then encrypting the target file.</p>
-<pre><code class="language-python">from cloudmesh.ai.ssh.encryption import SSHEncryption
-
-enc = SSHEncryption(file_in=&quot;secrets.txt&quot;, file_out=&quot;secrets.enc&quot;)
-enc.pem_create()
-enc.encrypt()
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">cloudmesh.ai.ssh.encryption</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHEncryption</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">enc</span> <span class="o">=</span> <span class="n">SSHEncryption</span><span class="p">(</span><span class="n">file_in</span><span class="o">=</span><span class="s2">&quot;secrets.txt&quot;</span><span class="p">,</span> <span class="n">file_out</span><span class="o">=</span><span class="s2">&quot;secrets.enc&quot;</span><span class="p">)</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">enc</span><span class="o">.</span><span class="n">pem_create</span><span class="p">()</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">enc</span><span class="o">.</span><span class="n">encrypt</span><span class="p">()</span>
+</span></code></pre></div>
 <h4 id="decrypting-a-file">Decrypting a File</h4>
 <p>Decrypts the encrypted file and prints the content.</p>
-<pre><code class="language-python">from cloudmesh.ai.ssh.encryption import SSHEncryption
-
-enc = SSHEncryption(file_in=&quot;temp.txt&quot;, file_out=&quot;secrets.enc&quot;)
-enc.decrypt()
-</code></pre>
+<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">cloudmesh.ai.ssh.encryption</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSHEncryption</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">enc</span> <span class="o">=</span> <span class="n">SSHEncryption</span><span class="p">(</span><span class="n">file_in</span><span class="o">=</span><span class="s2">&quot;temp.txt&quot;</span><span class="p">,</span> <span class="n">file_out</span><span class="o">=</span><span class="s2">&quot;secrets.enc&quot;</span><span class="p">)</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">enc</span><span class="o">.</span><span class="n">decrypt</span><span class="p">()</span>
+</span></code></pre></div>
 
 
 
