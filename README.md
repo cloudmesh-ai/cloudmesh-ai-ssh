@@ -1,16 +1,6 @@
-# cloudmesh-ai-ssh
+# Cloudmesh AI SSH
 
 **Code:** [GitHub](https://github.com/cloudmesh-ai/cloudmesh-ai-ssh) | **Documentation:** [Docs](https://cloudmesh-ai.github.io/cloudmesh-ai-ssh/)
-
-!!! info "Learning Objectives"
-
-    * Install and configure the `cloudmesh-ai-ssh` package.
-    * Create and manage SSH tunnels for remote service access.
-    * Programmatically manipulate the SSH configuration file.
-    * Use AI to diagnose and repair malformed SSH configuration entries.
-    * Encrypt and decrypt files using RSA keys.
-
-The `cloudmesh-ai-ssh` library provides a Python API and CLI tools for managing SSH tunnels, configuration files, authorized keys, and RSA encryption. It is designed for use in automation pipelines and by AI agents.
 
 ## Installation
 
