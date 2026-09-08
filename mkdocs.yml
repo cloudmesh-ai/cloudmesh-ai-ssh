@@ -31,15 +31,21 @@ repo_url: https://github.com/cloudmesh-ai/cloudmesh-ai-ssh
 repo_name: cloudmesh-ai-ssh
 
 markdown_extensions:
-  - admonition
-  - pymdownx.details
-  - pymdownx.tabbed:
-      alternate_style: true
   - pymdownx.highlight:
+      use_pygments: true
       anchor_linenums: true
+      line_spans: __span
+      pygments_style: colorful
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.inlinehilite
   - pymdownx.snippets
-
+  - pymdownx.tabbed
+  - admonition
+  - pymdownx.details
 theme:
   name: material
   features:

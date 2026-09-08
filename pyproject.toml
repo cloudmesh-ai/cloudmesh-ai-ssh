@@ -24,3 +24,8 @@ dependencies = [
 
 [project.entry-points."cloudmesh.ai.cmc"]
 ssh = "cloudmesh.ai.command.ssh.ssh_group"
+
+[tool.cloudmesh-ai]
+category = "infrastructure"
+status = "stable"
+order = 50

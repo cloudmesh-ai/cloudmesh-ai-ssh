@@ -1,5 +1,7 @@
 # Cloudmesh AI SSH
 
+Cloudmesh AI SSH provides tools for secure SSH tunneling, automated SSH configuration management, and AI-powered diagnostics to repair malformed SSH configurations.
+
 **Code:** [GitHub](https://github.com/cloudmesh-ai/cloudmesh-ai-ssh) | **Documentation:** [Docs](https://cloudmesh-ai.github.io/cloudmesh-ai-ssh/)
 
 ## Installation
